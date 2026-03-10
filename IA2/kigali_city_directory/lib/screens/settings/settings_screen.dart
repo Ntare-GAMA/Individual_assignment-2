@@ -163,7 +163,7 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (value) {
                 authProvider.updateNotificationPreference(value);
               },
-              activeColor: _amber,
+              activeThumbColor: _amber,
               secondary:
                   const Icon(Icons.notifications_outlined, color: _amber),
             ),

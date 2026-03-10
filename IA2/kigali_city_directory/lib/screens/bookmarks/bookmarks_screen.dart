@@ -12,8 +12,10 @@ class BookmarksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
     final listingProvider = context.watch<ListingProvider>();
     final bookmarked = listingProvider.bookmarkedListings;
+    final error = listingProvider.error;
 
     return Scaffold(
       appBar: AppBar(
@@ -23,72 +25,97 @@ class BookmarksScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // Bookmarks toggle header
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Bookmarks',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+      body: authProvider.user == null
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.lock_outline, size: 64, color: Colors.grey[600]),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Please log in to view bookmarks.',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-                ),
-                Switch(
-                  value: bookmarked.isNotEmpty,
-                  onChanged: null,
-                  activeColor: _amber,
-                ),
-              ],
-            ),
-          ),
-          // Bookmarked listings
-          Expanded(
-            child: bookmarked.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.bookmark_border,
-                            size: 64, color: Colors.grey[600]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No bookmarks yet',
-                          style: TextStyle(
-                              fontSize: 18, color: Colors.grey[400]),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Bookmark services to find them quickly',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
+                ],
+              ),
+            )
+          : error != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(error, style: const TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    // Bookmarks toggle header
+                    Container(
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: _cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Bookmarks',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Switch(
+                            value: bookmarked.isNotEmpty,
+                            onChanged: null,
+                            activeThumbColor: _amber,
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: bookmarked.length,
-                    itemBuilder: (context, index) {
-                      final listing = bookmarked[index];
-                      final distance = listingProvider.getDistance(
-                          listing.latitude, listing.longitude);
-                      return _buildBookmarkTile(
-                          context, listing, distance, listingProvider);
-                    },
-                  ),
-          ),
-        ],
-      ),
+                    // Bookmarked listings
+                    Expanded(
+                      child: bookmarked.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.bookmark_border,
+                                      size: 64, color: Colors.grey[600]),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No bookmarks yet',
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.grey[400]),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Bookmark services to find them quickly',
+                                    style: TextStyle(color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: bookmarked.length,
+                              itemBuilder: (context, index) {
+                                final listing = bookmarked[index];
+                                final distance = listingProvider.getDistance(
+                                    listing.latitude, listing.longitude);
+                                return _buildBookmarkTile(
+                                    context, listing, distance, listingProvider);
+                              },
+                            ),
+                    ),
+                  ],
+                ),
     );
   }
 
